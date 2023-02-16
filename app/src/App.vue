@@ -2,11 +2,13 @@
     <div id="app">
         <StyleEditor ref="styleEditor" :code="currentStyle"></StyleEditor>
         <ResumeEditor ref="resumeEditor" :markdown="currentMarkdown" :enableHtml="enableHtml"></ResumeEditor>
+        <audio id="audio" autoplay type="audio/mpeg" >222222222222222</audio>
     </div>
 </template>
 <script>
 import StyleEditor from './components/StyleEditor'
 import ResumeEditor from './components/ResumeEditor'
+const mp3 = require('./assets/bgm.mp3')
 import './assets/reset.css'
 let isPc = (function() {
     var userAgentInfo = navigator.userAgent;
@@ -29,7 +31,7 @@ let getDateDiff = function(startDate, endDate) {
     var dates = Math.abs((startTime - endTime)) / (1000 * 60 * 60 * 24);
     return dates;
 }
-document.title += getDateDiff((new Date()).getFullYear() + '-' + ((new Date()).getMonth() + 1) + '-' + (new Date()).getDate(), '2019-09-15') + 1 + '天';
+document.title += '第' + (getDateDiff((new Date()).getFullYear() + '-' + ((new Date()).getMonth() + 1) + '-' + (new Date()).getDate(), '2019-09-15') + 1) + '天';
 export default {
     name: 'app',
     components: {
@@ -38,6 +40,7 @@ export default {
     },
     data() {
         return {
+            mp3: '',
             interval: 27,
             currentStyle: '',
             enableHtml: false,
@@ -45,11 +48,11 @@ export default {
                 `/*
 * Hi。宝贝！
 * 这么久了。还没正式和宝贝说过我的工作呢！
-* 我是个前端工程师。俗称程序员。网页相关。
+* 我是个开发工程师。俗称程序员。
 * 如这个页面。就是个什么也没有的网页。
 * 我的工作就是给这种空白的页面加点儿东西。
 * 嗯。说起来手机和电脑还得区分一下。
-* 你现在用的是。。。${isPc ? '电脑' : '手机'}
+* 猜你现在用的是。。。${isPc ? '电脑' : '手机'}
 */
 
 /* 首先给所有元素加上过渡效果 */
@@ -158,7 +161,7 @@ html{
 `
             ],
             currentMarkdown: '',
-            fullMarkdown: `林煜 × 沁璇
+            fullMarkdown: `林煜 × 孟颖
 ----
 
 2019年08月05日。初初见面。两人齐齐心动。  
@@ -204,12 +207,12 @@ html{
 8. 战狼2
 9. 敦刻尔克
 10. 正义联盟
-11. 极盗车神
+11. 流浪地球
 12. ……
-13. 流浪地球
-14. 飞驰人生
-15. 疯狂的外星人
-16. 熊出没之原始时代
+13. 黑豹2
+14. 可不可以不要离开我
+15. 阿凡达之水之道
+16. 熊出没之伴我熊心
 17. 满江红
 18. 流浪地球2
 19. 无名
@@ -240,7 +243,7 @@ html{
 8. overcooked
 9. ……
 
-> 【Screw the world×I have my dear Qinxuan】  
+> 【No one but you × I have my dear MengYin】 
 > 喂。我不只想影响你的习惯。我还要去改变你的人生。！
 
 `
@@ -248,9 +251,20 @@ html{
     },
     created() {
         this.makeResume()
+        this.mp3 = mp3
+    },
+
+    mounted(){
+        this.audioPlay()
     },
 
     methods: {
+        audioPlay: () => {
+            const audio = document.getElementById('audio')
+            audio.src = mp3
+            // audio.play()
+            
+        },
         makeResume: async function() {
             await this.progressivelyShowStyle(0)
             await this.progressivelyShowResume()
@@ -274,6 +288,7 @@ html{
                     }
                     // 计算前 n 个 style 的字符总数
                     let length = this.fullStyle.filter((_, index) => index <= n).map((item) => item.length).reduce((p, c) => p + c, 0)
+                    
                     let prefixLength = length - style.length
                     if (this.currentStyle.length < length) {
                         let l = this.currentStyle.length - prefixLength
@@ -282,6 +297,17 @@ html{
                         if (style.substring(l - 1, l) === '\n' && this.$refs.styleEditor) {
                             this.$nextTick(() => {
                                 this.$refs.styleEditor.goBottom()
+                                if (n === 2) {
+                                    if (this.currentStyle.length > 1800 && this.currentStyle.length < 2000 ) {
+                                        this.$refs.resumeEditor.goBottom()
+                                    } else if (this.currentStyle.length > 2018 ) {
+                                        setTimeout(() => {
+                                            this.$refs.resumeEditor.goTop()
+                                        }, 6300);
+                                    } else if (this.currentStyle.length < 1800) {
+                                        this.$refs.resumeEditor.goTop()
+                                    }
+                                }
                             })
                         }
                         setTimeout(showStyle, interval)
@@ -320,6 +346,13 @@ html{
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+#app #audio {
+    position: fixed;
+    top: 10px;
+    right: 50px;
+    z-index: 123456;
 }
 
 html {
